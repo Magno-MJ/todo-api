@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  backend:
+    image: todo-api
+    container_name: todo-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
