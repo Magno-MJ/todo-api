@@ -11,6 +11,8 @@ services:
       - .:/app
     ports:
       - 8000:8000
+    networks:
+      - backend-todo-api
 
   postgres:
     container_name: "todo-database"
@@ -23,6 +25,8 @@ services:
       POSTGRES_DB: "todo-db"
     ports:
       - "5429:5432"
+    networks:
+      - backend-todo-api
 
   mailhog:
     container_name: "todo-mailhog"
@@ -32,6 +36,13 @@ services:
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
+    networks:
+      - backend-todo-api
+
+
+networks:
+  backend-todo-api:
+    name: todo-api-network
 
 volumes:
   todo-db-data:

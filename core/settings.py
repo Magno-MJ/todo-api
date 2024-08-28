@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'todo-db',
+        'USER': 'todo',
+        'PASSWORD': 'todo',
+        'HOST': 'todo-database', 
+        'PORT': '5432',      
     }
 }
 
@@ -128,5 +132,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Mail
 
-EMAIL_HOST = 'localhost'
+EMAIL_HOST = 'todo-mailhog'
 EMAIL_PORT = '1025'
