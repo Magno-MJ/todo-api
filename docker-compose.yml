@@ -11,3 +11,27 @@ services:
       - .:/app
     ports:
       - 8000:8000
+
+  postgres:
+    container_name: "todo-database"
+    image: postgres
+    volumes:
+      - todo-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "todo"
+      POSTGRES_PASSWORD: "todo"
+      POSTGRES_DB: "todo-db"
+    ports:
+      - "5429:5432"
+
+  mailhog:
+    container_name: "todo-mailhog"
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+
+volumes:
+  todo-db-data:
