@@ -6,7 +6,7 @@ from django.conf import settings
 from cryptocode import encrypt, decrypt
 from rest_framework import status
 from datetime import datetime
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from todo.models import Login
 
 class CreateUserView(APIView):
@@ -34,8 +34,11 @@ class ConfirmAccountView(APIView):
 
     token = request.query_params.get('token')
 
+    if token == None:
+      raise ValidationError("Token is missing")
+    
     user_id = decrypt(token, settings.SECRET_KEY)
-
+    
     try:
       login = Login.objects.get(pk=user_id)
       login.account_activated_at = datetime.now()
