@@ -3,10 +3,13 @@ from rest_framework.response import Response
 from todo.serializers import CreateUserSerializer
 from django.core.mail import send_mail
 from django.conf import settings
-from cryptocode import encrypt
+from cryptocode import encrypt, decrypt
 from rest_framework import status
+from datetime import datetime
+from rest_framework.exceptions import NotFound
+from todo.models import Login
 
-class CreateUserViewSet(APIView):
+class CreateUserView(APIView):
   def post(self, request):
     serializer = CreateUserSerializer(data=request.data)
 
@@ -24,3 +27,20 @@ class CreateUserViewSet(APIView):
     )
 
     return Response(created_user, status=status.HTTP_201_CREATED)
+  
+
+class ConfirmAccountView(APIView):
+  def post(self, request):
+
+    token = request.query_params.get('token')
+
+    user_id = decrypt(token, settings.SECRET_KEY)
+
+    try:
+      login = Login.objects.get(pk=user_id)
+      login.account_activated_at = datetime.now()
+      login.save()
+    except Login.DoesNotExist:
+      raise NotFound("User not found")
+
+    return Response()
