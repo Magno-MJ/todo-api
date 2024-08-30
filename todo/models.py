@@ -1,7 +1,9 @@
 from django.db import models
 import uuid
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from todo.managers import CustomLoginManager
 
-class Login(models.Model):
+class Login(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key = True, default = uuid.uuid4())
     email = models.EmailField(unique=True)
     password = models.CharField(max_length = 300)
@@ -10,6 +12,10 @@ class Login(models.Model):
 
     created_at = models.DateTimeField(auto_now_add = True)
     updated_at = models.DateTimeField(auto_now = True)
+
+    USERNAME_FIELD = 'email'
+
+    objects = CustomLoginManager()
 
     def __str__(self):
         return "Email: %s" % {self.email,}

@@ -1,7 +1,10 @@
+from datetime import datetime
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from django.contrib.auth.hashers import make_password
 from todo.models import Login, User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import AuthenticationFailed
+
 
 class CreateUserSerializer(serializers.Serializer):
   first_name = serializers.CharField(max_length=180, required=True)
@@ -13,8 +16,10 @@ class CreateUserSerializer(serializers.Serializer):
   def create(self, validated_data):
     login = Login(
       email=validated_data['email'],
-      password=make_password(validated_data['password'])
+      password=validated_data['password']
     )
+
+    login.set_password(login.password)
 
     login.save()
 
@@ -35,4 +40,22 @@ class CreateUserSerializer(serializers.Serializer):
 
     return data
 
-    
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+  def validate(self, attrs):
+    data = super().validate(attrs)
+    refresh = self.get_token(self.user)
+
+    data["refresh"] = str(refresh)
+    data["access"] = str(refresh.access_token)
+
+    login = Login.objects.get(email = attrs.get('email'))
+
+    if login.account_activated_at == None:
+      raise AuthenticationFailed("Account not activated")
+
+    login.last_login = datetime.now()
+    login.save()
+
+    return data

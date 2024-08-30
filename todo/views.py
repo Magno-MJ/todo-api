@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from todo.serializers import CreateUserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from todo.serializers import CreateUserSerializer, CustomTokenObtainPairSerializer
 from django.core.mail import send_mail
 from django.conf import settings
 from cryptocode import encrypt, decrypt
@@ -10,6 +11,8 @@ from rest_framework.exceptions import NotFound, ValidationError
 from todo.models import Login
 
 class CreateUserView(APIView):
+  permission_classes = []
+
   def post(self, request):
     serializer = CreateUserSerializer(data=request.data)
 
@@ -30,8 +33,9 @@ class CreateUserView(APIView):
   
 
 class ConfirmAccountView(APIView):
-  def post(self, request):
+  permission_classes = []
 
+  def post(self, request):
     token = request.query_params.get('token')
 
     if token == None:
@@ -47,3 +51,10 @@ class ConfirmAccountView(APIView):
       raise NotFound("User not found")
 
     return Response()
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+  serializer_class = CustomTokenObtainPairSerializer
+    
+class CreateTodoView(APIView):
+  def get(self, request):
+    return Response(request.user.user.id)
