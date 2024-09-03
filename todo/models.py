@@ -32,10 +32,10 @@ class User(models.Model):
     login = models.OneToOneField(Login, on_delete = models.CASCADE)
 
     def __str__(self):
-        return "Nome: %s, Sobrenome: %s" % {self.first_name, self.last_name,}
+        return f'id: {self.id}, first_name: {self.first_name}, last_name: {self.last_name}'
 
 
-class Task(models.Model):
+class Todo(models.Model):
     id = models.UUIDField(primary_key = True, default = uuid.uuid4())
     name = models.CharField(max_length = 180)
     description = models.TextField(max_length = 500)
