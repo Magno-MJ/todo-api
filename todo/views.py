@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from todo.serializers import (CreatedTodoSerializer, CreateTodoSerializer, CreateUserSerializer,
-  CustomTokenObtainPairSerializer)
+from todo.serializers import (CreateTodoSerializer, CreateUserSerializer,
+  CustomTokenObtainPairSerializer, TodoSerializer)
 from django.core.mail import send_mail
 from django.conf import settings
 from cryptocode import encrypt, decrypt
@@ -60,6 +60,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class ListCreateTodoView(generics.ListCreateAPIView):
+  serializer_class = TodoSerializer
+  
   def create(self, request):
     serializer = CreateTodoSerializer(data=request.data)
     
@@ -74,7 +76,13 @@ class ListCreateTodoView(generics.ListCreateAPIView):
 
     todo.save()
 
-    response = CreatedTodoSerializer()
+    response = TodoSerializer()
 
     return Response(response.to_representation(todo))
+  
+  def get_query_set(self):
+    if self.request.user.is_superuser:
+      return Todo.objects.all()
+    else:
+      return Todo.objects.filter(user=self.request.user.user)
   
