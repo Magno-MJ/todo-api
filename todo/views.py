@@ -1,19 +1,21 @@
 from rest_framework.views import APIView
+from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
-from todo.serializers import CreateUserSerializer, CustomTokenObtainPairSerializer
+from todo.serializers import (CreatedTodoSerializer, CreateTodoSerializer, CreateUserSerializer,
+  CustomTokenObtainPairSerializer)
 from django.core.mail import send_mail
 from django.conf import settings
 from cryptocode import encrypt, decrypt
 from rest_framework import status
 from datetime import datetime
 from rest_framework.exceptions import NotFound, ValidationError
-from todo.models import Login
+from todo.models import Login, Todo
 
-class CreateUserView(APIView):
+class CreateUserView(generics.CreateAPIView):
   permission_classes = []
 
-  def post(self, request):
+  def create(self, request):
     serializer = CreateUserSerializer(data=request.data)
 
     serializer.is_valid(raise_exception=True)
@@ -52,9 +54,27 @@ class ConfirmAccountView(APIView):
 
     return Response()
 
+
 class CustomTokenObtainPairView(TokenObtainPairView):
   serializer_class = CustomTokenObtainPairSerializer
+
+
+class ListCreateTodoView(generics.ListCreateAPIView):
+  def create(self, request):
+    serializer = CreateTodoSerializer(data=request.data)
     
-class CreateTodoView(APIView):
-  def get(self, request):
-    return Response(request.user.user.id)
+    if serializer.is_valid() == False:
+      raise ValidationError(serializer.errors)
+    
+    todo = Todo (
+      name=serializer.data.get('name'), 
+      description=serializer.data.get('description'),
+      user=request.user.user
+    )
+
+    todo.save()
+
+    response = CreatedTodoSerializer()
+
+    return Response(response.to_representation(todo))
+  

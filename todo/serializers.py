@@ -1,7 +1,7 @@
 from datetime import datetime
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from todo.models import Login, User
+from todo.models import Login, Todo, User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -44,18 +44,31 @@ class CreateUserSerializer(serializers.Serializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
   def validate(self, attrs):
+    login = Login.objects.get(email = attrs.get('email'))
+
+    if login.account_activated_at == None:
+      raise AuthenticationFailed("Account not activated")
+    
     data = super().validate(attrs)
+
     refresh = self.get_token(self.user)
 
     data["refresh"] = str(refresh)
     data["access"] = str(refresh.access_token)
 
-    login = Login.objects.get(email = attrs.get('email'))
-
-    if login.account_activated_at == None:
-      raise AuthenticationFailed("Account not activated")
-
     login.last_login = datetime.now()
     login.save()
 
     return data
+  
+
+class CreateTodoSerializer(serializers.Serializer):
+  name = serializers.CharField(max_length=180, required=True)
+  description = serializers.CharField(max_length=100, required=True)
+
+
+class CreatedTodoSerializer(serializers.ModelSerializer):
+  user_id = serializers.UUIDField(source='user.id')
+  class Meta:
+    model = Todo
+    exclude = ['user']
