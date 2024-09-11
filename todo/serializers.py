@@ -67,8 +67,14 @@ class CreateTodoSerializer(serializers.Serializer):
   description = serializers.CharField(max_length=100, required=True)
 
 
+class UpdateTodoSerializer(serializers.Serializer):
+  name = serializers.CharField(max_length=180, required=True)
+  description = serializers.CharField(max_length=100, required=False)
+
+
 class TodoSerializer(serializers.ModelSerializer):
   user_id = serializers.UUIDField(source='user.id')
   class Meta:
     model = Todo
     exclude = ['user']
+
