@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework import generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from todo.serializers import (CreateTodoSerializer, CreateUserSerializer,
-  CustomTokenObtainPairSerializer, TodoSerializer)
+  CustomTokenObtainPairSerializer, TodoSerializer, UpdateTodoSerializer)
 from django.core.mail import send_mail
 from django.conf import settings
 from cryptocode import encrypt, decrypt
@@ -11,6 +12,7 @@ from rest_framework import status
 from datetime import datetime
 from rest_framework.exceptions import NotFound, ValidationError
 from todo.models import Login, Todo
+from todo.permissions import TodoPermission
 
 class CreateUserView(generics.CreateAPIView):
   permission_classes = []
@@ -76,13 +78,63 @@ class ListCreateTodoView(generics.ListCreateAPIView):
 
     todo.save()
 
-    response = TodoSerializer()
+    response = TodoSerializer().to_representation(todo)
 
-    return Response(response.to_representation(todo))
+    return Response(response)
   
-  def get_query_set(self):
+  def get_queryset(self):
     if self.request.user.is_superuser:
       return Todo.objects.all()
     else:
       return Todo.objects.filter(user=self.request.user.user)
+    
+
+class RetrieveUpdateDestroyTodoView(generics.RetrieveUpdateDestroyAPIView):
+  permission_classes = [IsAuthenticated, TodoPermission]
   
+  def get(self, request, pk):
+    try:
+      todo = Todo.objects.get(pk=pk)
+
+      self.check_object_permissions(request, todo)
+
+      response = TodoSerializer()
+
+      return Response(response.to_representation(todo))
+    except:
+      raise NotFound("Todo not found")
+    
+  def patch(self, request, pk):
+    serializer = UpdateTodoSerializer(data=request.data)
+    
+    serializer.is_valid(raise_exception=True)
+
+    try:
+      todo = Todo.objects.get(pk=pk)
+      self.check_object_permissions(request, todo)
+          
+      for key in request.data.keys():
+        setattr(todo, key, request.data[key])
+      
+      todo.save()
+
+      response = TodoSerializer().to_representation(todo)
+
+      return Response(response)
+    except:
+      raise NotFound("Todo not found")
+
+  
+  def delete(self, request, pk):
+    try:
+      todo = Todo.objects.get(pk=pk)
+
+      self.check_object_permissions(request, todo)
+
+      response = TodoSerializer().to_representation(todo)
+
+      todo.delete()
+
+      return Response(response)
+    except:
+      raise NotFound("Todo not found")
