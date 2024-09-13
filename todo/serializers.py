@@ -41,7 +41,6 @@ class CreateUserSerializer(serializers.Serializer):
     return data
 
 
-
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
   def validate(self, attrs):
     login = Login.objects.get(email = attrs.get('email'))
@@ -68,7 +67,7 @@ class CreateTodoSerializer(serializers.Serializer):
 
 
 class UpdateTodoSerializer(serializers.Serializer):
-  name = serializers.CharField(max_length=180, required=True)
+  name = serializers.CharField(max_length=180, required=False)
   description = serializers.CharField(max_length=100, required=False)
 
 
