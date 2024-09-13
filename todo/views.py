@@ -16,6 +16,7 @@ from todo.permissions import TodoPermission
 
 class CreateUserView(generics.CreateAPIView):
   permission_classes = []
+  serializer_class = CreateUserSerializer
 
   def create(self, request):
     serializer = CreateUserSerializer(data=request.data)
@@ -46,7 +47,7 @@ class ConfirmAccountView(APIView):
       raise ValidationError("Token is missing")
     
     user_id = decrypt(token, settings.SECRET_KEY)
-    
+
     try:
       login = Login.objects.get(pk=user_id)
       login.account_activated_at = datetime.now()
@@ -104,6 +105,7 @@ class RetrieveUpdateDestroyTodoView(generics.RetrieveUpdateDestroyAPIView):
     except:
       raise NotFound("Todo not found")
     
+  
   def patch(self, request, pk):
     serializer = UpdateTodoSerializer(data=request.data)
     
