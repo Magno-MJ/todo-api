@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from todo.managers import CustomLoginManager
 
 class Login(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key = True, default = uuid.uuid4())
+    id = models.UUIDField(primary_key = True, default = uuid.uuid4)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length = 300)
 
@@ -22,7 +22,7 @@ class Login(AbstractBaseUser, PermissionsMixin):
 
 
 class User(models.Model):
-    id = models.UUIDField(primary_key = True, default = uuid.uuid4())
+    id = models.UUIDField(primary_key = True, default = uuid.uuid4)
     first_name = models.CharField(max_length = 180)
     last_name = models.CharField(max_length = 100)
     
@@ -36,7 +36,7 @@ class User(models.Model):
 
 
 class Todo(models.Model):
-    id = models.UUIDField(primary_key = True, default = uuid.uuid4())
+    id = models.UUIDField(primary_key = True, default = uuid.uuid4)
     name = models.CharField(max_length = 180)
     description = models.TextField(max_length = 500)
 
