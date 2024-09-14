@@ -1,3 +1,4 @@
+from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -16,8 +17,7 @@ from todo.permissions import TodoPermission
 
 class CreateUserView(generics.CreateAPIView):
   permission_classes = []
-  serializer_class = CreateUserSerializer
-
+  
   def create(self, request):
     serializer = CreateUserSerializer(data=request.data)
 
@@ -92,7 +92,7 @@ class ListCreateTodoView(generics.ListCreateAPIView):
 
 class RetrieveUpdateDestroyTodoView(generics.RetrieveUpdateDestroyAPIView):
   permission_classes = [IsAuthenticated, TodoPermission]
-  
+
   def get(self, request, pk):
     try:
       todo = Todo.objects.get(pk=pk)
