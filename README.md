@@ -2,7 +2,7 @@
 
 ## 📔 Description
 
-A simple API made with Django framework to manage user to-do's
+API made with Django framework to manage user to-do's
 
 ## 🚀 How to run the project
 
